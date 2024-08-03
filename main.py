@@ -22,13 +22,27 @@ def speak_text(text, lang='ja'):
     playsound("output.mp3")
 
 
-# 例
-
-
 import requests
 from bs4 import BeautifulSoup
 
-def main():
+YOUR_NUMBER = 38
+
+def is_due() -> bool:
+    # Get the current time in JST
+    now = datetime.now(JST).time()
+    # Define the desired time
+    desired_time = datetime.strptime('11:19', '%H:%M').time()
+
+    # Compare the current time with the desired time
+    return now > desired_time
+
+def worker():
+    if is_due():
+        speak_text(str("時間切れだよ。行こう行こう行こう行こう行こう行こう行こう"))
+        return
+    web()
+
+def web():
     # URLの取得
     url = 'https://ssc6.doctorqube.com/yamauchi-jibika/'
     response = requests.get(url)
@@ -45,7 +59,7 @@ def main():
 
         print(f"お待ちの方の番号: {waitlist_numbers}")
         first = waitlist_numbers_list[0]
-        if first > 40:
+        if (YOUR_NUMBER - first <= 3):
             speak_text(str("行こう行こう行こう行こう行こう行こう行こう"))
         # もし現在時刻が11:20amを超えていたら、行こうを出力
         else:
@@ -59,10 +73,11 @@ def main():
                 speak_text(str("時間切れだよ。行こう行こう行こう行こう行こう行こう行こう"))
 
         speak_text(str(first))
+        speak_text(f"残り{YOUR_NUMBER - first}人です")
 
     else:
         print("指定されたspanタグが見つかりませんでした。")
 
 for i in range(1000):
-    main()
+    worker()
     time.sleep(5)
